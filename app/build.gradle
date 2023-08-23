@@ -7,6 +7,10 @@ android {
     namespace 'com.example.foodapp'
     compileSdk 33
 
+    buildFeatures{
+        viewBinding true
+    }
+
     defaultConfig {
         applicationId "com.example.foodapp"
         minSdk 24
@@ -33,6 +37,8 @@ android {
 }
 
 dependencies {
+    def nav_version = "2.6.0"
+    def retrofit_version = '2.9.0'
 
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -41,4 +47,18 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+
+    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
+    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
+
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.17'
+
+
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
+
+
+    implementation 'com.github.bumptech.glide:glide:4.15.1'
 }
