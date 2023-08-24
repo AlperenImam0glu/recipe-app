@@ -1,11 +1,15 @@
 package com.example.foodapp.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.foodapp.databinding.FragmentHomeBinding
 import com.example.foodapp.models.Meal
 import com.example.foodapp.models.MealList
@@ -14,10 +18,25 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import com.bumptech.glide.Glide
+import com.example.foodapp.activities.MealActivity
+import com.example.foodapp.viewModel.HomeViewModel
 
 class HomeFragment : Fragment() {
 
-    lateinit var binding: FragmentHomeBinding
+    private lateinit var binding: FragmentHomeBinding
+    private lateinit var homeViewModel: HomeViewModel
+    private lateinit var randomMeal: Meal
+
+    companion object{
+        const val  MEAL_ID = "com.example.foodapp.fragments.idMeal"
+        const val  MEAL_NAME = "com.example.foodapp.fragments.nameMeal"
+        const val  MEAL_THUMB = "com.example.foodapp.fragments.thumbMeal"
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,26 +49,31 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        RetrofitInstance.api.getRandomMeal().enqueue(object : Callback<MealList> {
-            override fun onResponse(call: Call<MealList>, response: Response<MealList>) {
-                if (response.body() != null) {
-                    val randomMeal: Meal = response.body()!!.meals[0]
-                    Glide.with(this@HomeFragment)
-                        .load(randomMeal.strMealThumb)
-                        .centerCrop()
-                        .into(binding.imgRandomMeal)
+        homeViewModel.getRandomMeal()
+        observerRandomMeal()
+        onRandomMealClick()
+    }
 
-                } else {
-                    return
-                }
-            }
-
-            override fun onFailure(call: Call<MealList>, t: Throwable) {
-                Log.e("hata", t.message.toString())
-            }
-
+    private fun onRandomMealClick() {
+        binding.cardRandomMeal.setOnClickListener {
+            val intent = Intent(activity, MealActivity::class.java)
+            intent.putExtra(MEAL_ID,randomMeal.idMeal)
+            intent.putExtra(MEAL_NAME,randomMeal.strMeal)
+            intent.putExtra(MEAL_THUMB,randomMeal.strMealThumb)
+            startActivity(intent)
         }
-        )
+    }
+
+    private fun observerRandomMeal() {
+        homeViewModel.observeRandomMealLivedata().observe(viewLifecycleOwner) {
+            if (it != null) {
+                Glide.with(this@HomeFragment)
+                    .load(it!!.strMealThumb)
+                    .centerCrop()
+                    .into(binding.imgRandomMeal)
+                randomMeal = it
+            }
+        }
     }
 
 }
